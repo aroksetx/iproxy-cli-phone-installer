@@ -24,19 +24,19 @@ case $choice in
         if [ "${#devices[@]}" -gt 0 ]
         then
             for device in "${devices[@]}"; do
-                adb -s "$devices" shell service call audio 7 i32 3 i32 0 i32 1
-				        adb -s "$devices"  shell settings put global stay_on_while_plugged_in 0
-				        adb -s "$devices" shell settings put global wfc_ims_enabled 0
+				        printf "Processing: %s\n" "$device"
+                adb -s "$device"  shell settings put global stay_on_while_plugged_in 0
+				        adb -s "$device" shell settings put global wfc_ims_enabled 0
 
-				        adb -s "$devices" uninstall com.iproxy.android
-				        adb -s "$devices" install -r iproxy-app.apk
-				        adb -s "$devices" install -r ovpn.apk
+				        adb -s "$device" uninstall com.iproxy.android
+				        adb -s "$device" install -r iproxy-app.apk
+				        adb -s "$device" install -r ovpn.apk
 
-                adb -s "$devices" shell settings put secure assist_intent_service_component com.iproxy.android/com.iproxy.android.service.voice.IproxyVoiceInteractionService 
+                adb -s "$device" shell settings put secure assist_intent_service_component com.iproxy.android/com.iproxy.android.service.voice.IproxyVoiceInteractionService 
             done
 
             for device in "${devices[@]}"; do
-                scrcpy -s "$device" --stay-awake &
+                scrcpy -s "$device"  --stay-awake  &
             done
         else
             echo "No devices connected."
