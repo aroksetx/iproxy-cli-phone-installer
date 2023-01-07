@@ -1,5 +1,9 @@
 #!/bin/sh
 
+######SYSTEM######
+    devices=( $(adb devices | grep -v 'List' | cut -f1) )
+##################
+
 # Display menu
 echo "Menu:"
 echo "================================================================"
@@ -17,18 +21,28 @@ read -p "Enter your choice: " choice
 case $choice in
     1)
         # Code for option 1
-        adb shell dumpsys deviceidle enable
-				adb shell service call audio 7 i32 3 i32 0 i32 1
-				adb shell settings put global stay_on_while_plugged_in 0
-				adb shell settings put global wfc_ims_enabled 0
+        if [ "${#devices[@]}" -gt 0 ]
+        then
+            for device in "${devices[@]}"; do
+                adb -s "$devices" shell service call audio 7 i32 3 i32 0 i32 1
+				        adb -s "$devices"  shell settings put global stay_on_while_plugged_in 0
+				        adb -s "$devices" shell settings put global wfc_ims_enabled 0
 
-				adb uninstall com.iproxy.android
-				adb install -r iproxy-app.apk
-				adb install -r ovpn.apk
-        
-        adb shell settings put secure assist_intent_service_component com.iproxy.android/com.iproxy.android.service.voice.IproxyVoiceInteractionService
+				        adb -s "$devices" uninstall com.iproxy.android
+				        adb -s "$devices" install -r iproxy-app.apk
+				        adb -s "$devices" install -r ovpn.apk
 
-				scrcpy
+                adb -s "$devices" shell settings put secure assist_intent_service_component com.iproxy.android/com.iproxy.android.service.voice.IproxyVoiceInteractionService 
+            done
+
+            for device in "${devices[@]}"; do
+                scrcpy -s "$device" --stay-awake &
+            done
+        else
+            echo "No devices connected."
+        fi
+
+
 				;;
     2)
         # Code for option 2
@@ -37,7 +51,16 @@ case $choice in
         ;;
     3)
         # Code for option 3
-        scrcpy
+        if [ "${#devices[@]}" -gt 0 ]
+        then
+            for device in "${devices[@]}"; do
+                scrcpy -s "$device" --stay-awake &
+            done
+        else
+            echo "No devices connected."
+        fi
+
+        #scrcpy
 				;;
     4)
         # Exit the script
